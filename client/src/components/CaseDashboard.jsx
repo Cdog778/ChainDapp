@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export default function CaseDashboard({ er, viewCase }) {
+export default function CaseDashboard({ er, viewCase, startCaseCreation }) {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -8,14 +8,14 @@ export default function CaseDashboard({ er, viewCase }) {
     setLoading(true);
 
     const nextCaseId = await er.nextCaseId();
-    const arr = [];
+    let arr = [];
 
     for (let i = 0; i < nextCaseId; i++) {
       const c = await er.getCaseFull(i);
       arr.push({
-        id: c[0].toString(),
+        id: i,
         title: c[1],
-        status: c[2],
+        status: Number(c[2]),
       });
     }
 
@@ -27,20 +27,25 @@ export default function CaseDashboard({ er, viewCase }) {
     loadCases();
   }, []);
 
-  if (loading) return <p>Loading cases...</p>;
-
   return (
-    <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
+    <div className="card">
       <h3>Case Dashboard</h3>
 
-      {cases.length === 0 && <p>No cases found.</p>}
+      <button className="createButton" onClick={startCaseCreation}>
+        + Create New Case
+      </button>
+
+      {loading && <p>Loading cases...</p>}
+      {!loading && cases.length === 0 && <p>No cases found.</p>}
 
       {cases.map((c) => (
-        <div key={c.id} style={{ padding: "8px", borderBottom: "1px solid #ddd" }}>
-          <strong>Case {c.id}:</strong> {c.title}
-          <br />
-          Status: {["Open", "InLab", "Closed"][parseInt(c.status)]}
-          <br />
+        <div key={c.id} className="caseRow">
+          <div>
+            <strong>Case #{c.id}</strong> — {c.title}
+            <br />
+            Status: {["Open", "InLab", "Closed"][c.status]}
+          </div>
+
           <button onClick={() => viewCase(c.id)}>View Details</button>
         </div>
       ))}

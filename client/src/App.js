@@ -1,82 +1,72 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import "./App.css";
 
 import RegisterEvidence from "./components/RegisterEvidence";
 import TransferCustody from "./components/TransferCustody";
 import AddLabReport from "./components/AddLabReport";
 import CaseDashboard from "./components/CaseDashboard";
+import CaseCreation from "./components/CaseCreation";
 import EvidenceDetails from "./components/EvidenceDetails";
 import CustodyTimeline from "./components/CustodyTimeline";
 import IntegrityVerification from "./components/IntegrityVerification";
+import CaseDetails from "./components/CaseDetails";
 
 import EvidenceRegistry from "./abis/EvidenceRegistry.json";
 import RoleManager from "./abis/RoleManager.json";
 
-const EVIDENCE_REGISTRY_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-const ROLE_MANAGER_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+// Replace with deployed addresses
+const EVIDENCE_REGISTRY_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const ROLE_MANAGER_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
-function App() {
+export default function App() {
   const [account, setAccount] = useState(null);
   const [contracts, setContracts] = useState(null);
-  const [view, setView] = useState("home");   // navigation state
+
+  const [isInvestigator, setIsInvestigator] = useState(false);
+  const [isTechnician, setIsTechnician] = useState(false);
+
+  const [view, setView] = useState("home");
   const [selectedCase, setSelectedCase] = useState(null);
   const [selectedEvidence, setSelectedEvidence] = useState(null);
 
-  // -------------------------------
-  // Connect to MetaMask wallet
-  // -------------------------------
   async function connectWallet() {
-    try {
-      if (!window.ethereum) {
-        alert("MetaMask not detected.");
-        return;
-      }
-
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      setAccount(accounts[0]);
-    } catch (err) {
-      console.error("Wallet connection error:", err);
-    }
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+    setAccount(accounts[0]);
   }
 
-  // -------------------------------
-  // Load Blockchain Contracts
-  // -------------------------------
   async function loadBlockchain() {
     if (!account) return;
 
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
 
-      const er = new ethers.Contract(
-        EVIDENCE_REGISTRY_ADDRESS,
-        EvidenceRegistry.abi,
-        signer
-      );
+    const er = new ethers.Contract(
+      EVIDENCE_REGISTRY_ADDRESS,
+      EvidenceRegistry.abi,
+      signer
+    );
 
-      const rm = new ethers.Contract(
-        ROLE_MANAGER_ADDRESS,
-        RoleManager.abi,
-        signer
-      );
+    const rm = new ethers.Contract(
+      ROLE_MANAGER_ADDRESS,
+      RoleManager.abi,
+      signer
+    );
 
-      setContracts({ provider, signer, er, rm });
-    } catch (err) {
-      console.error("Blockchain load error:", err);
-    }
+    // Load roles
+    setIsInvestigator(await rm.isInvestigator(account));
+    setIsTechnician(await rm.isTechnician(account));
+
+    setContracts({ provider, signer, er, rm });
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadBlockchain();
   }, [account]);
 
-  // -------------------------------
-  // Navigation Helpers
-  // -------------------------------
   function goHome() {
     setView("home");
     setSelectedCase(null);
@@ -84,34 +74,51 @@ function App() {
   }
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
+    <div style={{ padding: "20px" }}>
       <h1>Chain of Custody DApp</h1>
 
       {!account && (
-        <button onClick={connectWallet} style={{ padding: "10px" }}>
+        <button onClick={connectWallet} className="primaryButton">
           Connect Wallet
         </button>
       )}
 
-      {account && <p><strong>Connected:</strong> {account}</p>}
+      {account && (
+        <div style={{ marginBottom: "15px" }}>
+          <strong>Connected:</strong> {account}
+        </div>
+      )}
 
-      {!contracts && account && <p>Loading smart contracts...</p>}
+      {/* ------- CLEAN SINGLE NAVBAR -------- */}
+      {contracts && (
+        <nav className="navbar">
+          <button onClick={goHome}>Home</button>
+          <button onClick={() => setView("cases")}>Cases</button>
+          {isInvestigator && (
+            <button onClick={() => setView("createCase")}>
+              Create Case
+            </button>
+          )}
+        </nav>
+      )}
 
+      {!contracts && account && <p>Loading blockchain...</p>}
+
+      {/* ======================= VIEWS ======================= */}
       {contracts && (
         <>
-          {/* HOME PAGE */}
+
+          {/* HOME VIEW */}
           {view === "home" && (
             <>
-              <RegisterEvidence er={contracts.er} />
-              <TransferCustody er={contracts.er} />
-              <AddLabReport er={contracts.er} />
+              {isInvestigator && (
+                <>
+                  <RegisterEvidence er={contracts.er} />
+                  <TransferCustody er={contracts.er} />
+                </>
+              )}
 
-              <button
-                style={{ marginTop: "20px" }}
-                onClick={() => setView("cases")}
-              >
-                View Case Dashboard
-              </button>
+              {isTechnician && <AddLabReport er={contracts.er} />}
             </>
           )}
 
@@ -123,43 +130,31 @@ function App() {
                 setSelectedCase(id);
                 setView("caseDetails");
               }}
+              startCaseCreation={() => setView("createCase")}
             />
           )}
 
-          {/* CASE DETAILS PAGE */}
+          {/* CASE CREATION */}
+          {view === "createCase" && (
+            <CaseCreation
+              er={contracts.er}
+              onCreated={() => setView("cases")}
+            />
+          )}
+
+          {/* CASE DETAILS */}
           {view === "caseDetails" && (
-            <>
-              <button onClick={goHome}>Home</button>
-
-              <h2>Case #{selectedCase}</h2>
-
-              <button
-                onClick={() => {
-                  setSelectedEvidence(selectedCase);
-                  setView("evidence");
-                }}
-              >
-                View Evidence Details
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedEvidence(selectedCase);
-                  setView("timeline");
-                }}
-              >
-                View Custody Timeline
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedEvidence(selectedCase);
-                  setView("verify");
-                }}
-              >
-                Verify Integrity
-              </button>
-            </>
+            <CaseDetails
+              er={contracts.er}
+              caseId={selectedCase}
+              goBack={() => setView("cases")}
+              openEvidence={(id, mode) => {
+                setSelectedEvidence(id);
+                if (mode === "details") setView("evidence");
+                if (mode === "timeline") setView("timeline");
+                if (mode === "verify") setView("verify");
+              }}
+            />
           )}
 
           {/* EVIDENCE DETAILS */}
@@ -171,7 +166,7 @@ function App() {
             />
           )}
 
-          {/* CUSTODY TIMELINE */}
+          {/* TIMELINE */}
           {view === "timeline" && (
             <CustodyTimeline
               er={contracts.er}
@@ -180,7 +175,7 @@ function App() {
             />
           )}
 
-          {/* INTEGRITY VERIFICATION */}
+          {/* VERIFY INTEGRITY */}
           {view === "verify" && (
             <IntegrityVerification
               er={contracts.er}
@@ -193,5 +188,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
