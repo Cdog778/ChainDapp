@@ -11,6 +11,10 @@ import EvidenceDetails from "./components/EvidenceDetails";
 import CustodyTimeline from "./components/CustodyTimeline";
 import IntegrityVerification from "./components/IntegrityVerification";
 import CaseDetails from "./components/CaseDetails";
+import AddCaseNote from "./components/AddCaseNote";
+import AddEvidenceToCase from "./components/AddEvidenceToCase";
+import ConnectWallet from "./components/ConnectWallet";
+
 
 import EvidenceRegistry from "./abis/EvidenceRegistry.json";
 import RoleManager from "./abis/RoleManager.json";
@@ -29,13 +33,6 @@ export default function App() {
   const [view, setView] = useState("home");
   const [selectedCase, setSelectedCase] = useState(null);
   const [selectedEvidence, setSelectedEvidence] = useState(null);
-
-  async function connectWallet() {
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
-    setAccount(accounts[0]);
-  }
 
   async function loadBlockchain() {
     if (!account) return;
@@ -78,9 +75,7 @@ export default function App() {
       <h1>Chain of Custody DApp</h1>
 
       {!account && (
-        <button onClick={connectWallet} className="primaryButton">
-          Connect Wallet
-        </button>
+        <ConnectWallet onConnect={(addr) => setAccount(addr)} />
       )}
 
       {account && (
@@ -154,6 +149,14 @@ export default function App() {
                 if (mode === "timeline") setView("timeline");
                 if (mode === "verify") setView("verify");
               }}
+              addNote={(id) => {
+                setSelectedCase(id);
+                setView("addCaseNote");
+              }}
+              addEvidence={(id) => {
+                setSelectedCase(id);
+                setView("addEvidenceToCase");
+              }}
             />
           )}
 
@@ -181,6 +184,25 @@ export default function App() {
               er={contracts.er}
               evidenceId={selectedEvidence}
               goBack={() => setView("caseDetails")}
+            />
+          )}
+
+          {/* ADD CASE NOTE */}
+          {view === "addCaseNote" && (
+            <AddCaseNote
+              er={contracts.er}
+              caseId={selectedCase}
+              goBack={() => setView("caseDetails")}
+              onAdded={() => setView("caseDetails")}
+            />
+          )}
+
+          {view === "addEvidenceToCase" && (
+            <AddEvidenceToCase
+              er={contracts.er}
+              caseId={selectedCase}
+              goBack={() => setView("caseDetails")}
+              onLinked={() => setView("caseDetails")}
             />
           )}
         </>
