@@ -126,31 +126,31 @@ contract EvidenceRegistry {
     // ------------------------------------------------------------
 
     function registerEvidence(
-        string calldata description,
-        EvidenceType evidenceType,
-        string calldata ipfsHash
+        string memory description,
+        uint8 evidenceType,
+        string memory ipfsHash
     ) external onlyInvestigator {
         uint256 id = nextEvidenceId++;
-        
+
         Evidence storage e = evidences[id];
         e.id = id;
         e.description = description;
-        e.evidenceType = evidenceType;
+        e.evidenceType = EvidenceType(evidenceType);  // FIXED
         e.ipfsHash = ipfsHash;
         e.currentHolder = msg.sender;
         e.timestampCreated = block.timestamp;
-
-        // First custody record
+        
         e.custodyHistory.push(
-            CustodyRecord({
-                from: address(0),
-                to: msg.sender,
-                timestamp: block.timestamp
-            })
-        );
+        CustodyRecord({
+            from: address(0),
+            to: msg.sender,
+            timestamp: block.timestamp
+        })
+    );
 
-        emit EvidenceRegistered(id, msg.sender, block.timestamp);
-    }
+    emit EvidenceRegistered(id, msg.sender, block.timestamp);
+}
+
 
     function transferCustody(uint256 evidenceId, address newHolder)
         external
@@ -241,7 +241,7 @@ contract EvidenceRegistry {
     }
 
     // ------------------------------------------------------------
-    // VERIFICATION
+    // VERIFICATION & GETTERS (Fix for Hardhat Console)
     // ------------------------------------------------------------
 
     function getEvidenceHash(uint256 evidenceId)
@@ -266,5 +266,37 @@ contract EvidenceRegistry {
         returns (string[] memory)
     {
         return evidences[evidenceId].labReports;
+    }
+
+
+    function getCaseEvidence(uint256 caseId)
+        external
+        view
+        returns (uint256[] memory)
+    {
+        return cases[caseId].evidenceIds;
+    }
+
+    function getCaseNotes(uint256 caseId)
+        external
+        view
+        returns (string[] memory)
+    {
+        return cases[caseId].notes;
+    }
+
+    function getCaseFull(uint256 caseId)
+        external
+        view
+        returns (
+            uint256 id,
+            string memory title,
+            CaseStatus status,
+            uint256[] memory evidenceIds,
+            string[] memory notes
+        )
+    {
+        Case storage c = cases[caseId];
+        return (c.caseId, c.title, c.status, c.evidenceIds, c.notes);
     }
 }
