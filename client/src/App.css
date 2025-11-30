@@ -1,104 +1,445 @@
 /* --- GLOBAL --- */
 body {
-  font-family: Arial, sans-serif;
-  background: #f3f3f3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+  min-height: 100vh;
   margin: 0;
   padding: 0;
+  color: #2c3e50;
+  line-height: 1.6;
 }
 
+/* App container */
+#root {
+  min-height: 100vh;
+}
+
+/* Main content area */
+div[style*="padding: 20px"] {
+  padding: 2rem !important;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Typography */
+h1 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced button styles */
 button {
-  background: #007bff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+button:hover::before {
+  left: 100%;
 }
 
 button:hover {
-  background: #0056c4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  filter: brightness(1.1);
 }
 
-input, select {
-  padding: 8px;
-  margin-top: 6px;
-  margin-bottom: 10px;
-  width: 250px;
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Button variants */
+.navbar button {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+}
+
+.navbar button:hover {
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+  box-shadow: 0 8px 25px rgba(44, 62, 80, 0.4);
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%) !important;
+  box-shadow: 0 4px 15px rgba(0, 180, 219, 0.3) !important;
+}
+
+.primaryButton:hover {
+  box-shadow: 0 8px 25px rgba(0, 180, 219, 0.4) !important;
+  filter: brightness(1.1) !important;
+}
+
+.secondaryButton {
+  background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%) !important;
+  box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3) !important;
+}
+
+.secondaryButton:hover {
+  box-shadow: 0 8px 25px rgba(86, 171, 47, 0.4) !important;
+  filter: brightness(1.1) !important;
+}
+
+.backButton {
+  background: linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%) !important;
+  color: #2c3e50 !important;
+  box-shadow: 0 4px 15px rgba(142, 158, 171, 0.3) !important;
+}
+
+.backButton:hover {
+  background: linear-gradient(135deg, #7f8c8d 0%, #bdc3c7 100%) !important;
+  box-shadow: 0 8px 25px rgba(142, 158, 171, 0.4) !important;
+}
+
+/* Form controls */
+input, select, textarea {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 350px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+  font-family: inherit;
 }
 
 /* --- NAVIGATION BAR --- */
 .navbar {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.navbar button {
-  background: #444;
-}
-
-.navbar button:hover {
-  background: #000;
+  gap: 12px;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 /* --- CARDS --- */
 .card {
-  background: white;
-  padding: 20px;
-  margin-bottom: 25px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #00b4db 100%);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced card content */
+.card h2, .card h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.card h2 {
+  font-size: 1.5rem;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 0.5rem;
+}
+
+.card h3 {
+  font-size: 1.2rem;
+  color: #34495e;
 }
 
 /* --- BACK BUTTON --- */
 .backButton {
-  margin-bottom: 10px;
-  background: #6c757d;
-}
-
-.backButton:hover {
-  background: #545b62;
+  margin-bottom: 1rem;
+  margin-right: 1rem;
 }
 
 /* --- EVIDENCE ROWS --- */
 .evidenceRow {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.evidenceRow:hover {
+  background: rgba(255, 255, 255, 0.05);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin: 0 -1rem;
+  border-radius: 8px;
+}
+
+.inlineButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .inlineButtons button {
-  margin-left: 8px;
+  margin: 0;
+  padding: 8px 16px;
+  font-size: 0.85rem;
 }
 
-.textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-}
-
-.secondaryButton {
-  background: #28a745;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  border: none;
-  margin-bottom: 12px;
-}
-
+/* --- NOTE ROWS --- */
 .noteRow {
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
 }
 
-.primaryButton {
-  padding: 10px 15px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.noteRow:hover {
+  background: rgba(255, 255, 255, 0.05);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin: 0 -1rem;
+  border-radius: 8px;
+}
+
+/* --- LOADING AND STATUS MESSAGES --- */
+div[style*="marginBottom"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 768px) {
+  div[style*="padding: 20px"] {
+    padding: 1rem !important;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .navbar {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .navbar button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .card {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  input, select, textarea {
+    max-width: 100%;
+  }
+
+  button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  .inlineButtons {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .inlineButtons button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+}
+
+/* --- SCROLLBAR STYLING --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.8);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* --- CONNECTION STATUS --- */
+.connection-status {
+  background: rgba(26, 188, 156, 0.25) !important;
+  border: 2px solid rgba(46, 204, 113, 0.5) !important;
+  color: #ffffff !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(15px) !important;
+  font-weight: 600 !important;
+  display: inline-block !important;
+  margin-bottom: 1.5rem !important;
+  font-family: 'Courier New', Consolas, monospace !important;
+  font-size: 0.95rem !important;
+  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.3) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  min-width: 300px !important;
+  text-align: left !important;
+}
+
+/* Connected wallet address styling */
+.connection-status strong {
+  color: #2ecc71 !important;
+  font-weight: 700 !important;
+  display: inline-block !important;
+}
+
+.connection-status .wallet-address {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  margin-left: 8px !important;
+  display: inline-block !important;
+}
+
+/* Add a subtle indicator before the address */
+.connection-status::before {
+  content: '🔗';
+  margin-right: 8px;
+  font-size: 1.1em;
+  animation: pulse 2s infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* --- LOADING STATE --- */
+div[style*="Loading blockchain"] {
+  background: rgba(52, 152, 219, 0.15) !important;
+  border: 1px solid rgba(52, 152, 219, 0.3) !important;
+  color: #ffffff !important;
+  padding: 2rem !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(10px) !important;
+  text-align: center !important;
+  font-size: 1.1rem !important;
+  margin: 2rem 0 !important;
 }
 
 

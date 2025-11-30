@@ -79,8 +79,8 @@ export default function App() {
       )}
 
       {account && (
-        <div style={{ marginBottom: "15px" }}>
-          <strong>Connected:</strong> {account}
+        <div className="connection-status">
+          <strong>Connected:</strong> <span className="wallet-address">{account}</span>
         </div>
       )}
 
