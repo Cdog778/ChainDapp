@@ -45,7 +45,9 @@ export default function CaseDetails({
       <hr />
 
       {/* EVIDENCE SECTION */}
-      <h3>Evidence in This Case</h3>
+      <h3>
+        Evidence in This Case ({evidenceIds.length})
+      </h3>
 
       <button
         className="secondaryButton"

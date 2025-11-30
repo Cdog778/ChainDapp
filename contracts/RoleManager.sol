@@ -3,61 +3,90 @@ pragma solidity ^0.8.20;
 
 /**
  * @title RoleManager
- * @dev Handles role-based access control for the Chain of Custody DApp.
- * Roles: Admin, Investigator, Forensic Technician
+ * @dev Manages Admin, Investigator, and Technician roles.
+ *  - Deployer becomes initial admin (super admin)
+ *  - Admins can grant/revoke roles for others
  */
 contract RoleManager {
-    address public admin;
+    address public superAdmin;
 
-    mapping(address => bool) private investigators;
-    mapping(address => bool) private technicians;
+    mapping(address => bool) public isAdmin;
+    mapping(address => bool) public isInvestigator;
+    mapping(address => bool) public isTechnician;
 
-    event InvestigatorAdded(address indexed investigator);
-    event TechnicianAdded(address indexed technician);
-    event RoleRevoked(address indexed user);
+    event AdminAdded(address indexed account);
+    event AdminRemoved(address indexed account);
+
+    event InvestigatorAdded(address indexed account);
+    event InvestigatorRemoved(address indexed account);
+
+    event TechnicianAdded(address indexed account);
+    event TechnicianRemoved(address indexed account);
 
     modifier onlyAdmin() {
-        require(msg.sender == admin, "Only admin can perform this action");
+        require(isAdmin[msg.sender], "Only admin");
         _;
     }
 
     constructor() {
-        admin = msg.sender;
+        superAdmin = msg.sender;
+        isAdmin[msg.sender] = true;
+        emit AdminAdded(msg.sender);
     }
 
-    // ---------------------------
-    // ROLE MANAGEMENT
-    // ---------------------------
+    // --------- ADMIN MANAGEMENT ----------
 
-    function addInvestigator(address user) external onlyAdmin {
-        investigators[user] = true;
-        emit InvestigatorAdded(user);
+    function addAdmin(address account) external onlyAdmin {
+        require(account != address(0), "Invalid address");
+        require(!isAdmin[account], "Already admin");
+        isAdmin[account] = true;
+        emit AdminAdded(account);
     }
 
-    function addTechnician(address user) external onlyAdmin {
-        technicians[user] = true;
-        emit TechnicianAdded(user);
+    function removeAdmin(address account) external onlyAdmin {
+        require(account != superAdmin, "Cannot remove super admin");
+        require(isAdmin[account], "Not admin");
+        isAdmin[account] = false;
+        emit AdminRemoved(account);
     }
 
-    function revokeRole(address user) external onlyAdmin {
-        investigators[user] = false;
-        technicians[user] = false;
-        emit RoleRevoked(user);
+    // --------- INVESTIGATOR MANAGEMENT ----------
+
+    function addInvestigator(address account) external onlyAdmin {
+        require(account != address(0), "Invalid address");
+        require(!isInvestigator[account], "Already investigator");
+        isInvestigator[account] = true;
+        emit InvestigatorAdded(account);
     }
 
-    // ---------------------------
-    // ROLE CHECKS
-    // ---------------------------
-
-    function isInvestigator(address user) external view returns (bool) {
-        return investigators[user];
+    function removeInvestigator(address account) external onlyAdmin {
+        require(isInvestigator[account], "Not investigator");
+        isInvestigator[account] = false;
+        emit InvestigatorRemoved(account);
     }
 
-    function isTechnician(address user) external view returns (bool) {
-        return technicians[user];
+    // --------- TECHNICIAN MANAGEMENT ----------
+
+    function addTechnician(address account) external onlyAdmin {
+        require(account != address(0), "Invalid address");
+        require(!isTechnician[account], "Already technician");
+        isTechnician[account] = true;
+        emit TechnicianAdded(account);
     }
 
-    function isAdmin(address user) external view returns (bool) {
-        return user == admin;
+    function removeTechnician(address account) external onlyAdmin {
+        require(isTechnician[account], "Not technician");
+        isTechnician[account] = false;
+        emit TechnicianRemoved(account);
+    }
+
+    // --------- HELPERS ----------
+
+    function getRoles(address account)
+        external
+        view
+        returns (bool admin, bool investigator, bool technician)
+    {
+        return (isAdmin[account], isInvestigator[account], isTechnician[account]);
     }
 }

@@ -7,65 +7,51 @@ export default function RegisterEvidence({ er }) {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState("");
 
-  // Encrypt the file contents
-  async function encryptFile(file) {
-    const fileText = await file.text();
-
-    // In a real system, this key would be per-case or per-agency, not hard-coded
-    const encrypted = CryptoJS.AES.encrypt(fileText, "secret-key").toString();
-    return encrypted;
-  }
-
-  // Hash the encrypted content (simulating a content-address / IPFS-like ID)
-  function hashContent(encryptedContent) {
-    const hash = CryptoJS.SHA256(encryptedContent).toString(); // hex string
-    // Optional: prefix to make it clear it's local/simulated
-    return "hash-" + hash;
+  // Compute SHA-256 over raw bytes, normalized to lowercase hex
+  async function computeFileHash(selectedFile) {
+    const buffer = await selectedFile.arrayBuffer();
+    const wordArray = CryptoJS.lib.WordArray.create(buffer);
+    const hashHex = CryptoJS.SHA256(wordArray).toString(CryptoJS.enc.Hex).toLowerCase();
+    return hashHex;
   }
 
   async function register() {
     try {
       if (!file) {
-        alert("Please choose a file.");
+        alert("Please choose a file first.");
         return;
       }
 
-      setStatus("Encrypting evidence file...");
-      const encrypted = await encryptFile(file);
+      setStatus("Computing file hash...");
+      const hashHex = await computeFileHash(file);
 
-      setStatus("Hashing encrypted content...");
-      const contentHash = hashContent(encrypted);
+      // store a consistent format
+      const storedValue = "hash:" + hashHex;
 
-      setStatus("Sending transaction to blockchain...");
-      const tx = await er.registerEvidence(description, evidenceType, contentHash);
+      setStatus("Sending transaction...");
+      const tx = await er.registerEvidence(description, evidenceType, storedValue);
       await tx.wait();
 
-      setStatus(
-        "Success! Evidence registered.\nStored hash: " +
-          contentHash.slice(0, 20) +
-          "..."
-      );
+      setStatus(`Success! Evidence registered.\nStored hash: ${storedValue}`);
     } catch (err) {
       console.error(err);
-      setStatus("Error: " + (err.message || String(err)));
+      setStatus("Error: " + (err.reason || err.message));
     }
   }
 
   return (
-    <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
-      <h3>Register New Evidence</h3>
+    <div className="card">
+      <h2>Register New Evidence</h2>
 
+      <label>Description</label><br/>
       <input
         type="text"
-        placeholder="Description"
         value={description}
+        placeholder="Short description"
         onChange={(e) => setDescription(e.target.value)}
-        style={{ width: "300px", marginBottom: "10px" }}
       />
 
-      <br />
-
-      <label>Evidence Type: </label>
+      <label>Evidence Type</label><br/>
       <select
         value={evidenceType}
         onChange={(e) => setEvidenceType(Number(e.target.value))}
@@ -77,17 +63,12 @@ export default function RegisterEvidence({ er }) {
         <option value={4}>Other</option>
       </select>
 
-      <br />
-      <br />
-
+      <label>Evidence File</label><br/>
       <input type="file" onChange={(e) => setFile(e.target.files[0])} />
 
-      <br />
-      <br />
+      <button className="primaryButton" onClick={register}>Register Evidence</button>
 
-      <button onClick={register}>Register Evidence</button>
-
-      <p style={{ whiteSpace: "pre-line" }}>{status}</p>
+      <p>{status}</p>
     </div>
   );
 }
