@@ -442,4 +442,49 @@ div[style*="Loading blockchain"] {
   margin: 2rem 0 !important;
 }
 
+.verifyMatch {
+  color: green;
+  font-weight: bold;
+  margin-top: 10px;
+}
 
+.verifyMismatch {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.secondaryButton {
+  background: #28a745;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  background: #218838;
+}
+
+.matchText {
+  color: green;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.mismatchText {
+  color: red;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+/* Improve cards */
+.card h2, .card h3 {
+  margin-top: 0;
+}
+
+/* Improve spacing in details views */
+.card p {
+  margin: 6px 0;
+}

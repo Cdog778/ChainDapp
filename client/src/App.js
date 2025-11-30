@@ -14,12 +14,11 @@ import CaseDetails from "./components/CaseDetails";
 import AddCaseNote from "./components/AddCaseNote";
 import AddEvidenceToCase from "./components/AddEvidenceToCase";
 import ConnectWallet from "./components/ConnectWallet";
-
+import AdminDashboard from "./components/AdminDashboard";
 
 import EvidenceRegistry from "./abis/EvidenceRegistry.json";
 import RoleManager from "./abis/RoleManager.json";
 
-// Replace with deployed addresses
 const EVIDENCE_REGISTRY_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const ROLE_MANAGER_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
@@ -27,12 +26,22 @@ export default function App() {
   const [account, setAccount] = useState(null);
   const [contracts, setContracts] = useState(null);
 
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isInvestigator, setIsInvestigator] = useState(false);
   const [isTechnician, setIsTechnician] = useState(false);
 
   const [view, setView] = useState("home");
   const [selectedCase, setSelectedCase] = useState(null);
   const [selectedEvidence, setSelectedEvidence] = useState(null);
+
+  function computeRoleLabel() {
+    const roles = [];
+    if (isAdmin) roles.push("Admin");
+    if (isInvestigator) roles.push("Investigator");
+    if (isTechnician) roles.push("Technician");
+    if (!roles.length) roles.push("Unassigned");
+    return roles.join(", ");
+  }
 
   async function loadBlockchain() {
     if (!account) return;
@@ -52,9 +61,11 @@ export default function App() {
       signer
     );
 
-    // Load roles
-    setIsInvestigator(await rm.isInvestigator(account));
-    setIsTechnician(await rm.isTechnician(account));
+    const [admin, inv, tech] = await rm.getRoles(account);
+
+    setIsAdmin(admin);
+    setIsInvestigator(inv);
+    setIsTechnician(tech);
 
     setContracts({ provider, signer, er, rm });
   }
@@ -84,26 +95,36 @@ export default function App() {
         </div>
       )}
 
-      {/* ------- CLEAN SINGLE NAVBAR -------- */}
+      {account && contracts && (
+        <p style={{ marginBottom: "20px" }}>
+          <strong>Role:</strong> {computeRoleLabel()}
+        </p>
+      )}
+
+      {/* NAVBAR */}
       {contracts && (
         <nav className="navbar">
           <button onClick={goHome}>Home</button>
-          <button onClick={() => setView("cases")}>Cases</button>
+
           {isInvestigator && (
-            <button onClick={() => setView("createCase")}>
-              Create Case
-            </button>
+            <>
+              <button onClick={() => setView("cases")}>Cases</button>
+              <button onClick={() => setView("createCase")}>Create Case</button>
+            </>
+          )}
+
+          {isAdmin && (
+            <button onClick={() => setView("admin")}>Admin</button>
           )}
         </nav>
       )}
 
       {!contracts && account && <p>Loading blockchain...</p>}
 
-      {/* ======================= VIEWS ======================= */}
+      {/* VIEWS */}
       {contracts && (
         <>
-
-          {/* HOME VIEW */}
+          {/* HOME */}
           {view === "home" && (
             <>
               {isInvestigator && (
@@ -114,6 +135,18 @@ export default function App() {
               )}
 
               {isTechnician && <AddLabReport er={contracts.er} />}
+
+              {!isInvestigator && !isTechnician && !isAdmin && (
+                <div className="card">
+                  <h3>No Role Assigned</h3>
+                  <p>Your account has not been assigned a role in the system.</p>
+                  <p>Please contact an administrator to be added as:</p>
+                  <ul>
+                    <li>Investigator</li>
+                    <li>Technician</li>
+                  </ul>
+                </div>
+              )}
             </>
           )}
 
@@ -166,9 +199,16 @@ export default function App() {
               er={contracts.er}
               evidenceId={selectedEvidence}
               goBack={() => setView("caseDetails")}
+              openTimeline={(id) => {
+                setSelectedEvidence(id);
+                setView("timeline");
+              }}
+              openVerify={(id) => {
+                setSelectedEvidence(id);
+                setView("verify");
+              }}
             />
           )}
-
           {/* TIMELINE */}
           {view === "timeline" && (
             <CustodyTimeline
@@ -178,7 +218,7 @@ export default function App() {
             />
           )}
 
-          {/* VERIFY INTEGRITY */}
+          {/* VERIFY */}
           {view === "verify" && (
             <IntegrityVerification
               er={contracts.er}
@@ -197,12 +237,22 @@ export default function App() {
             />
           )}
 
+          {/* LINK EVIDENCE */}
           {view === "addEvidenceToCase" && (
             <AddEvidenceToCase
               er={contracts.er}
               caseId={selectedCase}
               goBack={() => setView("caseDetails")}
               onLinked={() => setView("caseDetails")}
+            />
+          )}
+
+          {/* ADMIN */}
+          {view === "admin" && (
+            <AdminDashboard
+              rm={contracts.rm}
+              currentAccount={account}
+              goBack={goHome}
             />
           )}
         </>

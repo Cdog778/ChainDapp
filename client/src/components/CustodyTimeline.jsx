@@ -12,7 +12,13 @@ export default function CustodyTimeline({ er, evidenceId, goBack }) {
       return {
         from,
         to,
-        time: new Date(Number(timestamp) * 1000).toLocaleString(),
+        time: new Date(Number(timestamp) * 1000).toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit"
+        })
       };
     });
 
