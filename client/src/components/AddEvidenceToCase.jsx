@@ -1,26 +1,33 @@
 import React, { useState, useEffect } from "react";
 
-export default function AddEvidenceToCase({ er, caseId, onLinked, goBack }) {
+export default function AddEvidenceToCase({ er, caseId, goBack, onLinked }) {
   const [evidenceList, setEvidenceList] = useState([]);
   const [selected, setSelected] = useState("");
   const [status, setStatus] = useState("");
 
   async function loadEvidence() {
-    const nextId = await er.nextEvidenceId();
-    let arr = [];
-    for (let i = 0; i < nextId; i++) arr.push(i);
-    setEvidenceList(arr);
+    try {
+      const nextIdBn = await er.nextEvidenceId();
+      const nextId = Number(nextIdBn.toString());   // SAFE
+
+      let arr = [];
+      for (let i = 0; i < nextId; i++) arr.push(i);
+
+      setEvidenceList(arr);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  async function linkEvidence() {
-    if (selected === "") {
-      alert("Select evidence ID");
-      return;
-    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    loadEvidence();
+  }, []);
 
+  async function linkEvidence() {
     try {
       setStatus("Linking evidence...");
-      const tx = await er.linkEvidenceToCase(caseId, Number(selected));
+      const tx = await er.linkEvidenceToCase(Number(caseId), Number(selected));
       await tx.wait();
       setStatus("Linked successfully!");
       onLinked();
@@ -30,30 +37,22 @@ export default function AddEvidenceToCase({ er, caseId, onLinked, goBack }) {
     }
   }
 
-  useEffect(() => {
-    loadEvidence();
-  }, []);
-
   return (
     <div className="card">
-      <button className="backButton" onClick={goBack}>← Back</button>
+      <button onClick={goBack} className="backButton">← Back</button>
+      <h2>Link Evidence to Case #{caseId}</h2>
 
-      <h3>Link Evidence to Case #{caseId}</h3>
-
-      <label>Select Evidence</label>
-      <select
-        value={selected}
-        onChange={(e) => setSelected(e.target.value)}
-      >
-        <option value="">-- Choose Evidence --</option>
+      <label>Select Evidence:</label>
+      <select value={selected} onChange={(e) => setSelected(e.target.value)}>
+        <option value="">-- choose --</option>
         {evidenceList.map((id) => (
-          <option key={id} value={id}>Evidence #{id}</option>
+          <option value={id} key={id}>Evidence #{id}</option>
         ))}
       </select>
 
-      <br/><br/>
+      <br /><br />
 
-      <button onClick={linkEvidence} className="primaryButton">
+      <button className="primaryButton" onClick={linkEvidence}>
         Link Evidence
       </button>
 

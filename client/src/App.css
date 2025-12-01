@@ -111,9 +111,13 @@ button:active {
 }
 
 .backButton {
-  background: linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%) !important;
-  color: #2c3e50 !important;
-  box-shadow: 0 4px 15px rgba(142, 158, 171, 0.3) !important;
+  margin-bottom: 10px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .backButton:hover {

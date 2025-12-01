@@ -4,46 +4,49 @@ export default function CustodyTimeline({ er, evidenceId, goBack }) {
   const [events, setEvents] = useState([]);
 
   async function loadTimeline() {
-    const filter = er.filters.CustodyTransferred(evidenceId);
-    const logs = await er.queryFilter(filter);
+    try {
+      const filter = er.filters.CustodyTransferred(evidenceId);
+      const logs = await er.queryFilter(filter);
 
-    const timeline = logs.map((log) => {
-      const { from, to, timestamp } = log.args;
-      return {
-        from,
-        to,
-        time: new Date(Number(timestamp) * 1000).toLocaleString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit"
-        })
-      };
-    });
+      const parsed = logs.map((log) => {
+        const { from, to, timestamp } = log.args;
 
-    setEvents(timeline);
+        return {
+          from,
+          to,
+          time: new Date(Number(timestamp.toString()) * 1000).toLocaleString()
+        };
+      });
+
+      setEvents(parsed);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadTimeline();
   }, [evidenceId]);
 
   return (
-    <div style={{ padding: "10px", border: "1px solid #ccc" }}>
-      <button onClick={goBack}>Back</button>
-      <h3>Custody Timeline for Evidence {evidenceId}</h3>
+    <div className="card">
+      <button className="backButton" onClick={goBack}>← Back</button>
 
-      {events.length === 0 && <p>No custody transfers yet.</p>}
+      <h2>Custody Timeline</h2>
 
-      {events.map((e, i) => (
-        <div key={i} style={{ marginBottom: "8px" }}>
-          <strong>{i + 1}. </strong>
-          {e.from} → {e.to}
-          <br />
-          <small>{e.time}</small>
-        </div>
-      ))}
+      {events.length === 0 ? (
+        <p>No transfers yet.</p>
+      ) : (
+        events.map((e, i) => (
+          <div key={i} className="noteRow">
+            <strong>{i + 1}. </strong>
+            {e.from} → {e.to}
+            <br />
+            <span style={{ fontSize: "0.85em", color: "#777" }}>{e.time}</span>
+          </div>
+        ))
+      )}
     </div>
   );
 }
