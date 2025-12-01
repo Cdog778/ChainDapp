@@ -54,6 +54,11 @@ input, select {
 .backButton {
   margin-bottom: 10px;
   background: #6c757d;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .backButton:hover {
@@ -84,6 +89,7 @@ input, select {
   padding: 6px 10px;
   border-radius: 4px;
   border: none;
+  cursor: pointer;
   margin-bottom: 12px;
 }
 
