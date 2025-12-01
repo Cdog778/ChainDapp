@@ -91,13 +91,14 @@ export default function App() {
 
       {account && (
         <div className="connection-status">
-          <strong>Connected:</strong> <span className="wallet-address">{account}</span>
+          <strong>Connected:</strong>{" "}
+          <span className="wallet-address">{account}</span>
         </div>
       )}
 
       {account && contracts && (
-        <p style={{ marginBottom: "20px" }}>
-          <strong>Role:</strong> {computeRoleLabel()}
+        <p className="role-title" style={{ marginBottom: "1.5rem" }}>
+          Role: {computeRoleLabel()}
         </p>
       )}
 
@@ -209,6 +210,7 @@ export default function App() {
               }}
             />
           )}
+
           {/* TIMELINE */}
           {view === "timeline" && (
             <CustodyTimeline

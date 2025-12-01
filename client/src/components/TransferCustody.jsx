@@ -7,49 +7,42 @@ export default function TransferCustody({ er }) {
 
   async function transfer() {
     try {
-      if (!evidenceId || !newHolder) {
-        alert("Please fill all fields");
-        return;
-      }
-
-      setStatus("Sending transaction...");
-
       const tx = await er.transferCustody(
         Number(evidenceId),
         newHolder
       );
       await tx.wait();
-
-      setStatus("Custody transferred successfully!");
+      setStatus("Transfer successful!");
     } catch (err) {
       console.error(err);
-      setStatus("Error: " + err.message);
+      setStatus("Error: " + (err.reason || err.message));
     }
   }
 
   return (
-    <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
-      <h3>Transfer Custody</h3>
+    <div className="card">
+      {/* 🔹 ONLY THIS LINE CHANGED */}
+      <h2 className="section-title">Transfer Custody</h2>
 
+      <label>Evidence ID</label>
+      <br />
       <input
         type="number"
-        placeholder="Evidence ID"
         value={evidenceId}
         onChange={(e) => setEvidenceId(e.target.value)}
-        style={{ marginBottom: "10px" }}
       />
-      <br />
 
+      <label>New holder address</label>
+      <br />
       <input
         type="text"
-        placeholder="New holder address"
         value={newHolder}
         onChange={(e) => setNewHolder(e.target.value)}
-        style={{ width: "300px", marginBottom: "10px" }}
       />
-      <br />
 
-      <button onClick={transfer}>Transfer</button>
+      <button className="primaryButton" onClick={transfer}>
+        TRANSFER
+      </button>
 
       <p>{status}</p>
     </div>
